@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package herbchain.attest.v1;
+
+option go_package = "github.com/parthg2112/herbchain/x/attest/types";
+
+// AttestPacketData defines the Attest data packet.
+message AttestPacketData {
+  oneof packet {
+    NoData                noData             = 1;
+    AttestationPacketData attestation_packet = 2;
+  }
+}
+
+// NoData defines an empty data packet.
+message NoData {}
+
+// AttestationPacketData defines a struct for the packet payload
+message AttestationPacketData {
+  string batch_id        = 1;
+  string herb_type       = 2;
+  string farmer          = 3;
+  string status          = 4;
+  string lab_report_hash = 5;
+  int64  source_height   = 6;
+}
+
+// AttestationPacketAck defines a struct for the packet acknowledgment
+message AttestationPacketAck {
+  bool received = 1;
+}
+

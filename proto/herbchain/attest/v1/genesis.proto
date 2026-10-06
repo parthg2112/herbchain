@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package herbchain.attest.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "herbchain/attest/v1/params.proto";
+
+option go_package = "github.com/parthg2112/herbchain/x/attest/types";
+
+// GenesisState defines the attest module's genesis state.
+message GenesisState {
+  
+  // params defines all the parameters of the module.
+  Params params  = 1 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+  string port_id = 2;
+}
+

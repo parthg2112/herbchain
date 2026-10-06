@@ -30,6 +30,8 @@ import (
 	ibckeeper "github.com/cosmos/ibc-go/v10/modules/core/keeper"
 	solomachine "github.com/cosmos/ibc-go/v10/modules/light-clients/06-solomachine"
 	ibctm "github.com/cosmos/ibc-go/v10/modules/light-clients/07-tendermint"
+	attestmodule "github.com/parthg2112/herbchain/x/attest/module"
+	attestmoduletypes "github.com/parthg2112/herbchain/x/attest/types"
 )
 
 // registerIBCModules register IBC keepers and non dependency inject modules.
@@ -112,6 +114,9 @@ func (app *App) registerIBCModules(appOpts servertypes.AppOptions) error {
 		AddRoute(ibctransfertypes.ModuleName, transferStack).
 		AddRoute(icacontrollertypes.SubModuleName, icaControllerStack).
 		AddRoute(icahosttypes.SubModuleName, icaHostStack)
+	ibcRouter = ibcRouter.AddRoute(attestmoduletypes.
+		ModuleName, attestmodule.
+		NewIBCModule(app.appCodec, app.AttestKeeper))
 
 	// create IBC v2 router, add transfer route, then set it on the keeper
 	ibcv2Router := ibcapi.NewRouter().

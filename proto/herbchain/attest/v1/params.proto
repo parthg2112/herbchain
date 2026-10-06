@@ -1,0 +1,14 @@
+syntax = "proto3";
+package herbchain.attest.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/parthg2112/herbchain/x/attest/types";
+
+// Params defines the parameters for the module.
+message Params {
+  option (amino.name) = "herbchain/x/attest/Params";
+  option (gogoproto.equal) = true;
+  
+}

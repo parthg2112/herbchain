@@ -1,0 +1,13 @@
+syntax = "proto3";
+package herbchain.herbtrace.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/parthg2112/herbchain/x/herbtrace/types";
+
+// Params defines the parameters for the module.
+message Params {
+  option (amino.name) = "herbchain/x/herbtrace/Params";
+  option (gogoproto.equal) = true;
+}

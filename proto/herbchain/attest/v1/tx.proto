@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package herbchain.attest.v1;
+
+import "amino/amino.proto";
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "herbchain/attest/v1/params.proto";
+
+option go_package = "github.com/parthg2112/herbchain/x/attest/types";
+
+// Msg defines the Msg service.
+service Msg {
+  option (cosmos.msg.v1.service) = true;
+  
+  // UpdateParams defines a (governance) operation for updating the module
+  // parameters. The authority defaults to the x/gov module account.
+  rpc UpdateParams (MsgUpdateParams) returns (MsgUpdateParamsResponse);
+  
+  // SendAttestation defines the SendAttestation RPC.
+  rpc SendAttestation (MsgSendAttestation) returns (MsgSendAttestationResponse);
+}
+// MsgUpdateParams is the Msg/UpdateParams request type.
+message MsgUpdateParams {
+  option (cosmos.msg.v1.signer) =                          "authority";
+  option           (amino.name) = "herbchain/x/attest/MsgUpdateParams";
+  
+  // authority is the address that controls the module (defaults to x/gov unless overwritten).
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  
+  // params defines the module parameters to update.
+  
+  // NOTE: All parameters must be supplied.
+  Params params = 2 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+}
+
+// MsgUpdateParamsResponse defines the response structure for executing a
+// MsgUpdateParams message.
+message MsgUpdateParamsResponse {}
+
+// MsgSendAttestation defines the MsgSendAttestation message.
+message MsgSendAttestation {
+  option (cosmos.msg.v1.signer) = "creator";
+  string batch_id         =  5;
+  string herb_type        =  6;
+  string farmer           =  7;
+  string status           =  8;
+  string lab_report_hash  =  9;
+  int64  source_height    = 10;
+  string creator          =  1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string port             =  2;
+  string channelID        =  3;
+  uint64 timeoutTimestamp =  4;
+}
+
+// MsgSendAttestationResponse defines the MsgSendAttestationResponse message.
+message MsgSendAttestationResponse {}
+

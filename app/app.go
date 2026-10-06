@@ -46,6 +46,8 @@ import (
 	ibckeeper "github.com/cosmos/ibc-go/v10/modules/core/keeper"
 
 	"github.com/parthg2112/herbchain/docs"
+	attestmodulekeeper "github.com/parthg2112/herbchain/x/attest/keeper"
+	herbtracemodulekeeper "github.com/parthg2112/herbchain/x/herbtrace/keeper"
 )
 
 const (
@@ -98,7 +100,9 @@ type App struct {
 	TransferKeeper      ibctransferkeeper.Keeper
 
 	// simulation manager
-	sm *module.SimulationManager
+	sm              *module.SimulationManager
+	HerbtraceKeeper herbtracemodulekeeper.Keeper
+	AttestKeeper    attestmodulekeeper.Keeper
 }
 
 func init() {
@@ -178,6 +182,8 @@ func New(
 		&app.ConsensusParamsKeeper,
 		&app.CircuitBreakerKeeper,
 		&app.ParamsKeeper,
+		&app.HerbtraceKeeper,
+		&app.AttestKeeper,
 	); err != nil {
 		panic(err)
 	}

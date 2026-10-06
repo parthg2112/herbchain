@@ -7,3 +7,9 @@ release/
 *.dot
 *.log
 *.ign
+
+# local chain data, build output
+/build/
+.herbchain*/
+/data/
+coverage*.out
