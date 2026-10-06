@@ -5,10 +5,13 @@ import (
 
 	"cosmossdk.io/core/address"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	herbtracetypes "github.com/parthg2112/herbchain/x/herbtrace/types"
 )
 
+// HerbtraceKeeper is the read-only view of x/herbtrace used to build attestations.
 type HerbtraceKeeper interface {
-	// TODO Add methods imported from herbtrace should be defined here
+	GetBatch(ctx context.Context, id string) (herbtracetypes.Batch, error)
 }
 
 // AuthKeeper defines the expected interface for the Auth module.

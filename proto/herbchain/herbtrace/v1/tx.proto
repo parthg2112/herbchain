@@ -77,7 +77,7 @@ message MsgUpdateStatus {
   string batch_id = 2;
   BatchStatus status = 3;
   string location = 4;
-  string note = 5;
+  string remark = 5;
 }
 
 // MsgUpdateStatusResponse defines the Msg/UpdateStatus response type.
@@ -92,7 +92,7 @@ message MsgRecordLabResult {
   string batch_id = 2;
   bool passed = 3;
   string report_hash = 4;
-  string note = 5;
+  string remark = 5;
 }
 
 // MsgRecordLabResultResponse defines the Msg/RecordLabResult response type.
@@ -109,7 +109,7 @@ message MsgTransferCustody {
   string batch_id = 2;
   string new_owner = 3 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string location = 4;
-  string note = 5;
+  string remark = 5;
 }
 
 // MsgTransferCustodyResponse defines the Msg/TransferCustody response type.
