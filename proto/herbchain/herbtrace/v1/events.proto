@@ -1,0 +1,40 @@
+syntax = "proto3";
+package herbchain.herbtrace.v1;
+
+import "cosmos_proto/cosmos.proto";
+import "herbchain/herbtrace/v1/batch.proto";
+
+option go_package = "github.com/parthg2112/herbchain/x/herbtrace/types";
+
+// EventBatchCreated is emitted by MsgCreateBatch.
+message EventBatchCreated {
+  string batch_id = 1;
+  string farmer = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string herb_type = 3;
+  uint64 quantity_grams = 4;
+}
+
+// EventStatusUpdated is emitted by MsgUpdateStatus.
+message EventStatusUpdated {
+  string batch_id = 1;
+  string actor = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  BatchStatus from_status = 3;
+  BatchStatus to_status = 4;
+  string location = 5;
+}
+
+// EventLabResultRecorded is emitted by MsgRecordLabResult.
+message EventLabResultRecorded {
+  string batch_id = 1;
+  string certifier = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  bool passed = 3;
+  string report_hash = 4;
+  BatchStatus to_status = 5;
+}
+
+// EventCustodyTransferred is emitted by MsgTransferCustody.
+message EventCustodyTransferred {
+  string batch_id = 1;
+  string from_owner = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string to_owner = 3 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}

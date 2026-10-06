@@ -3,15 +3,26 @@ package herbchain.herbtrace.v1;
 
 import "amino/amino.proto";
 import "gogoproto/gogo.proto";
+import "herbchain/herbtrace/v1/batch.proto";
 import "herbchain/herbtrace/v1/params.proto";
 
 option go_package = "github.com/parthg2112/herbchain/x/herbtrace/types";
 
 // GenesisState defines the herbtrace module's genesis state.
+// Owner and status indexes are derived and rebuilt in InitGenesis.
 message GenesisState {
   // params defines all the parameters of the module.
   Params params = 1 [
     (gogoproto.nullable) = false,
     (amino.dont_omitempty) = true
   ];
+  repeated Batch batches = 2 [(gogoproto.nullable) = false];
+  repeated HistoryEntry history = 3 [(gogoproto.nullable) = false];
+  repeated HistorySeq history_seqs = 4 [(gogoproto.nullable) = false];
+}
+
+// HistorySeq is the next history sequence number for a batch.
+message HistorySeq {
+  string batch_id = 1;
+  uint64 next_seq = 2;
 }

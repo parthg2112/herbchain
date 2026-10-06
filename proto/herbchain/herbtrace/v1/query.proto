@@ -3,8 +3,10 @@ package herbchain.herbtrace.v1;
 
 import "amino/amino.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
+import "herbchain/herbtrace/v1/batch.proto";
 import "herbchain/herbtrace/v1/params.proto";
 
 option go_package = "github.com/parthg2112/herbchain/x/herbtrace/types";
@@ -14,6 +16,26 @@ service Query {
   // Parameters queries the parameters of the module.
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
     option (google.api.http).get = "/parthg2112/herbchain/herbtrace/v1/params";
+  }
+  // Batch returns one batch by id.
+  rpc Batch(QueryBatchRequest) returns (QueryBatchResponse) {
+    option (google.api.http).get = "/parthg2112/herbchain/herbtrace/v1/batches/{id}";
+  }
+  // Batches lists all batches ordered by id.
+  rpc Batches(QueryBatchesRequest) returns (QueryBatchesResponse) {
+    option (google.api.http).get = "/parthg2112/herbchain/herbtrace/v1/batches";
+  }
+  // BatchHistory lists a batch's history entries in seq order.
+  rpc BatchHistory(QueryBatchHistoryRequest) returns (QueryBatchHistoryResponse) {
+    option (google.api.http).get = "/parthg2112/herbchain/herbtrace/v1/batches/{id}/history";
+  }
+  // BatchesByOwner lists batches currently held by an owner.
+  rpc BatchesByOwner(QueryBatchesByOwnerRequest) returns (QueryBatchesByOwnerResponse) {
+    option (google.api.http).get = "/parthg2112/herbchain/herbtrace/v1/owners/{owner}/batches";
+  }
+  // BatchesByStatus lists batches in a given status.
+  rpc BatchesByStatus(QueryBatchesByStatusRequest) returns (QueryBatchesByStatusResponse) {
+    option (google.api.http).get = "/parthg2112/herbchain/herbtrace/v1/statuses/{status}/batches";
   }
 }
 
@@ -27,4 +49,61 @@ message QueryParamsResponse {
     (gogoproto.nullable) = false,
     (amino.dont_omitempty) = true
   ];
+}
+
+// QueryBatchRequest is the Query/Batch request type.
+message QueryBatchRequest {
+  string id = 1;
+}
+
+// QueryBatchResponse is the Query/Batch response type.
+message QueryBatchResponse {
+  Batch batch = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryBatchesRequest is the Query/Batches request type.
+message QueryBatchesRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryBatchesResponse is the Query/Batches response type.
+message QueryBatchesResponse {
+  repeated Batch batches = 1 [(gogoproto.nullable) = false];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryBatchHistoryRequest is the Query/BatchHistory request type.
+message QueryBatchHistoryRequest {
+  string id = 1;
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryBatchHistoryResponse is the Query/BatchHistory response type.
+message QueryBatchHistoryResponse {
+  repeated HistoryEntry entries = 1 [(gogoproto.nullable) = false];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryBatchesByOwnerRequest is the Query/BatchesByOwner request type.
+message QueryBatchesByOwnerRequest {
+  string owner = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryBatchesByOwnerResponse is the Query/BatchesByOwner response type.
+message QueryBatchesByOwnerResponse {
+  repeated Batch batches = 1 [(gogoproto.nullable) = false];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryBatchesByStatusRequest is the Query/BatchesByStatus request type.
+message QueryBatchesByStatusRequest {
+  BatchStatus status = 1;
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryBatchesByStatusResponse is the Query/BatchesByStatus response type.
+message QueryBatchesByStatusResponse {
+  repeated Batch batches = 1 [(gogoproto.nullable) = false];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }

@@ -2,6 +2,7 @@ syntax = "proto3";
 package herbchain.herbtrace.v1;
 
 import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 
 option go_package = "github.com/parthg2112/herbchain/x/herbtrace/types";
@@ -10,4 +11,9 @@ option go_package = "github.com/parthg2112/herbchain/x/herbtrace/types";
 message Params {
   option (amino.name) = "herbchain/x/herbtrace/Params";
   option (gogoproto.equal) = true;
+
+  // certifiers are the addresses allowed to send MsgRecordLabResult.
+  repeated string certifiers = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // max_certifications caps Batch.certifications length.
+  uint32 max_certifications = 2;
 }

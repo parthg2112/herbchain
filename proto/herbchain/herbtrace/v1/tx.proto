@@ -5,6 +5,7 @@ import "amino/amino.proto";
 import "cosmos/msg/v1/msg.proto";
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
+import "herbchain/herbtrace/v1/batch.proto";
 import "herbchain/herbtrace/v1/params.proto";
 
 option go_package = "github.com/parthg2112/herbchain/x/herbtrace/types";
@@ -16,6 +17,14 @@ service Msg {
   // UpdateParams defines a (governance) operation for updating the module
   // parameters. The authority defaults to the x/gov module account.
   rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+  // CreateBatch registers a new batch in HARVESTED status owned by the farmer.
+  rpc CreateBatch(MsgCreateBatch) returns (MsgCreateBatchResponse);
+  // UpdateStatus moves a batch one owner-driven step forward.
+  rpc UpdateStatus(MsgUpdateStatus) returns (MsgUpdateStatusResponse);
+  // RecordLabResult moves a PROCESSED batch to TESTED or REJECTED.
+  rpc RecordLabResult(MsgRecordLabResult) returns (MsgRecordLabResultResponse);
+  // TransferCustody hands a non-terminal batch to a new owner.
+  rpc TransferCustody(MsgTransferCustody) returns (MsgTransferCustodyResponse);
 }
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
@@ -38,3 +47,70 @@ message MsgUpdateParams {
 // MsgUpdateParamsResponse defines the response structure for executing a
 // MsgUpdateParams message.
 message MsgUpdateParamsResponse {}
+
+// MsgCreateBatch is the Msg/CreateBatch request type.
+message MsgCreateBatch {
+  option (cosmos.msg.v1.signer) = "farmer";
+  option (amino.name) = "herbchain/x/herbtrace/MsgCreateBatch";
+
+  string farmer = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string id = 2;
+  string herb_type = 3;
+  int64 origin_lat_micro = 4;
+  int64 origin_lng_micro = 5;
+  int64 harvest_time = 6;
+  uint64 quantity_grams = 7;
+  string quality_grade = 8;
+  repeated string certifications = 9;
+  string location = 10;
+}
+
+// MsgCreateBatchResponse defines the Msg/CreateBatch response type.
+message MsgCreateBatchResponse {}
+
+// MsgUpdateStatus is the Msg/UpdateStatus request type.
+message MsgUpdateStatus {
+  option (cosmos.msg.v1.signer) = "owner";
+  option (amino.name) = "herbchain/x/herbtrace/MsgUpdateStatus";
+
+  string owner = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string batch_id = 2;
+  BatchStatus status = 3;
+  string location = 4;
+  string note = 5;
+}
+
+// MsgUpdateStatusResponse defines the Msg/UpdateStatus response type.
+message MsgUpdateStatusResponse {}
+
+// MsgRecordLabResult is the Msg/RecordLabResult request type.
+message MsgRecordLabResult {
+  option (cosmos.msg.v1.signer) = "certifier";
+  option (amino.name) = "herbchain/x/herbtrace/MsgRecordLabResult";
+
+  string certifier = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string batch_id = 2;
+  bool passed = 3;
+  string report_hash = 4;
+  string note = 5;
+}
+
+// MsgRecordLabResultResponse defines the Msg/RecordLabResult response type.
+message MsgRecordLabResultResponse {
+  BatchStatus status = 1;
+}
+
+// MsgTransferCustody is the Msg/TransferCustody request type.
+message MsgTransferCustody {
+  option (cosmos.msg.v1.signer) = "owner";
+  option (amino.name) = "herbchain/x/herbtrace/MsgTransferCustody";
+
+  string owner = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string batch_id = 2;
+  string new_owner = 3 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string location = 4;
+  string note = 5;
+}
+
+// MsgTransferCustodyResponse defines the Msg/TransferCustody response type.
+message MsgTransferCustodyResponse {}
