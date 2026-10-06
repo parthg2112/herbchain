@@ -28,3 +28,8 @@ var (
 
 // ParamsKey is the prefix to retrieve all Params
 var ParamsKey = collections.NewPrefix("p_attest")
+
+var (
+	AttestationsKey     = collections.NewPrefix(1)
+	SentAttestationsKey = collections.NewPrefix(2)
+)

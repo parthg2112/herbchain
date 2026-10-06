@@ -13,24 +13,24 @@ option go_package = "github.com/parthg2112/herbchain/x/attest/types";
 // Msg defines the Msg service.
 service Msg {
   option (cosmos.msg.v1.service) = true;
-  
+
   // UpdateParams defines a (governance) operation for updating the module
   // parameters. The authority defaults to the x/gov module account.
-  rpc UpdateParams (MsgUpdateParams) returns (MsgUpdateParamsResponse);
-  
-  // SendAttestation defines the SendAttestation RPC.
-  rpc SendAttestation (MsgSendAttestation) returns (MsgSendAttestationResponse);
+  rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+
+  // SendAttestation attests a lab-tested batch to the chain behind channel_id.
+  rpc SendAttestation(MsgSendAttestation) returns (MsgSendAttestationResponse);
 }
+
 // MsgUpdateParams is the Msg/UpdateParams request type.
 message MsgUpdateParams {
-  option (cosmos.msg.v1.signer) =                          "authority";
-  option           (amino.name) = "herbchain/x/attest/MsgUpdateParams";
-  
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name)           = "herbchain/x/attest/MsgUpdateParams";
+
   // authority is the address that controls the module (defaults to x/gov unless overwritten).
   string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  
+
   // params defines the module parameters to update.
-  
   // NOTE: All parameters must be supplied.
   Params params = 2 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
 }
@@ -39,21 +39,19 @@ message MsgUpdateParams {
 // MsgUpdateParams message.
 message MsgUpdateParamsResponse {}
 
-// MsgSendAttestation defines the MsgSendAttestation message.
+// MsgSendAttestation sends an attestation packet built from x/herbtrace state.
 message MsgSendAttestation {
   option (cosmos.msg.v1.signer) = "creator";
-  string batch_id         =  5;
-  string herb_type        =  6;
-  string farmer           =  7;
-  string status           =  8;
-  string lab_report_hash  =  9;
-  int64  source_height    = 10;
-  string creator          =  1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  string port             =  2;
-  string channelID        =  3;
-  uint64 timeoutTimestamp =  4;
+  option (amino.name)           = "herbchain/x/attest/MsgSendAttestation";
+
+  string creator    = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string batch_id   = 2;
+  string channel_id = 3;
+  // timeout_timestamp is an absolute unix time in nanoseconds.
+  uint64 timeout_timestamp = 4;
 }
 
-// MsgSendAttestationResponse defines the MsgSendAttestationResponse message.
-message MsgSendAttestationResponse {}
-
+// MsgSendAttestationResponse returns the IBC packet sequence.
+message MsgSendAttestationResponse {
+  uint64 sequence = 1;
+}

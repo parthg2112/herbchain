@@ -35,6 +35,7 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 type MsgUpdateParams struct {
 	// authority is the address that controls the module (defaults to x/gov unless overwritten).
 	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	// params defines the module parameters to update.
 	// NOTE: All parameters must be supplied.
 	Params Params `protobuf:"bytes,2,opt,name=params,proto3" json:"params"`
 }
@@ -124,18 +125,13 @@ func (m *MsgUpdateParamsResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgUpdateParamsResponse proto.InternalMessageInfo
 
-// MsgSendAttestation defines the MsgSendAttestation message.
+// MsgSendAttestation sends an attestation packet built from x/herbtrace state.
 type MsgSendAttestation struct {
-	BatchId          string `protobuf:"bytes,5,opt,name=batch_id,json=batchId,proto3" json:"batch_id,omitempty"`
-	HerbType         string `protobuf:"bytes,6,opt,name=herb_type,json=herbType,proto3" json:"herb_type,omitempty"`
-	Farmer           string `protobuf:"bytes,7,opt,name=farmer,proto3" json:"farmer,omitempty"`
-	Status           string `protobuf:"bytes,8,opt,name=status,proto3" json:"status,omitempty"`
-	LabReportHash    string `protobuf:"bytes,9,opt,name=lab_report_hash,json=labReportHash,proto3" json:"lab_report_hash,omitempty"`
-	SourceHeight     int64  `protobuf:"varint,10,opt,name=source_height,json=sourceHeight,proto3" json:"source_height,omitempty"`
-	Creator          string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
-	Port             string `protobuf:"bytes,2,opt,name=port,proto3" json:"port,omitempty"`
-	ChannelID        string `protobuf:"bytes,3,opt,name=channelID,proto3" json:"channelID,omitempty"`
-	TimeoutTimestamp uint64 `protobuf:"varint,4,opt,name=timeoutTimestamp,proto3" json:"timeoutTimestamp,omitempty"`
+	Creator   string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	BatchId   string `protobuf:"bytes,2,opt,name=batch_id,json=batchId,proto3" json:"batch_id,omitempty"`
+	ChannelId string `protobuf:"bytes,3,opt,name=channel_id,json=channelId,proto3" json:"channel_id,omitempty"`
+	// timeout_timestamp is an absolute unix time in nanoseconds.
+	TimeoutTimestamp uint64 `protobuf:"varint,4,opt,name=timeout_timestamp,json=timeoutTimestamp,proto3" json:"timeout_timestamp,omitempty"`
 }
 
 func (m *MsgSendAttestation) Reset()         { *m = MsgSendAttestation{} }
@@ -171,48 +167,6 @@ func (m *MsgSendAttestation) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgSendAttestation proto.InternalMessageInfo
 
-func (m *MsgSendAttestation) GetBatchId() string {
-	if m != nil {
-		return m.BatchId
-	}
-	return ""
-}
-
-func (m *MsgSendAttestation) GetHerbType() string {
-	if m != nil {
-		return m.HerbType
-	}
-	return ""
-}
-
-func (m *MsgSendAttestation) GetFarmer() string {
-	if m != nil {
-		return m.Farmer
-	}
-	return ""
-}
-
-func (m *MsgSendAttestation) GetStatus() string {
-	if m != nil {
-		return m.Status
-	}
-	return ""
-}
-
-func (m *MsgSendAttestation) GetLabReportHash() string {
-	if m != nil {
-		return m.LabReportHash
-	}
-	return ""
-}
-
-func (m *MsgSendAttestation) GetSourceHeight() int64 {
-	if m != nil {
-		return m.SourceHeight
-	}
-	return 0
-}
-
 func (m *MsgSendAttestation) GetCreator() string {
 	if m != nil {
 		return m.Creator
@@ -220,16 +174,16 @@ func (m *MsgSendAttestation) GetCreator() string {
 	return ""
 }
 
-func (m *MsgSendAttestation) GetPort() string {
+func (m *MsgSendAttestation) GetBatchId() string {
 	if m != nil {
-		return m.Port
+		return m.BatchId
 	}
 	return ""
 }
 
-func (m *MsgSendAttestation) GetChannelID() string {
+func (m *MsgSendAttestation) GetChannelId() string {
 	if m != nil {
-		return m.ChannelID
+		return m.ChannelId
 	}
 	return ""
 }
@@ -241,8 +195,9 @@ func (m *MsgSendAttestation) GetTimeoutTimestamp() uint64 {
 	return 0
 }
 
-// MsgSendAttestationResponse defines the MsgSendAttestationResponse message.
+// MsgSendAttestationResponse returns the IBC packet sequence.
 type MsgSendAttestationResponse struct {
+	Sequence uint64 `protobuf:"varint,1,opt,name=sequence,proto3" json:"sequence,omitempty"`
 }
 
 func (m *MsgSendAttestationResponse) Reset()         { *m = MsgSendAttestationResponse{} }
@@ -278,6 +233,13 @@ func (m *MsgSendAttestationResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgSendAttestationResponse proto.InternalMessageInfo
 
+func (m *MsgSendAttestationResponse) GetSequence() uint64 {
+	if m != nil {
+		return m.Sequence
+	}
+	return 0
+}
+
 func init() {
 	proto.RegisterType((*MsgUpdateParams)(nil), "herbchain.attest.v1.MsgUpdateParams")
 	proto.RegisterType((*MsgUpdateParamsResponse)(nil), "herbchain.attest.v1.MsgUpdateParamsResponse")
@@ -288,44 +250,39 @@ func init() {
 func init() { proto.RegisterFile("herbchain/attest/v1/tx.proto", fileDescriptor_cced9b5c091524b8) }
 
 var fileDescriptor_cced9b5c091524b8 = []byte{
-	// 584 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x53, 0xbf, 0x6f, 0xd3, 0x40,
-	0x14, 0x8e, 0xfb, 0x23, 0xad, 0x8f, 0x56, 0x85, 0xa3, 0xa2, 0xae, 0x1b, 0x99, 0x28, 0x20, 0x88,
-	0x22, 0xb0, 0x95, 0x20, 0x18, 0x3a, 0x20, 0x35, 0x62, 0x48, 0x87, 0x48, 0xc8, 0x2d, 0x0b, 0x8b,
-	0x75, 0xb6, 0x0f, 0x9f, 0x45, 0xec, 0xb3, 0xee, 0x2e, 0x55, 0xb3, 0x21, 0x46, 0x26, 0xfe, 0x0c,
-	0xc6, 0x0c, 0xfc, 0x01, 0x8c, 0x1d, 0x2b, 0x26, 0x16, 0x10, 0x4a, 0x86, 0x88, 0xff, 0x02, 0xdd,
-	0xd9, 0x26, 0x22, 0x0d, 0xa2, 0x8b, 0xe5, 0xf7, 0x7d, 0xdf, 0x7b, 0xdf, 0xbd, 0x7b, 0xef, 0x40,
-	0x8d, 0x60, 0xe6, 0x07, 0x04, 0xc5, 0xa9, 0x83, 0x84, 0xc0, 0x5c, 0x38, 0x67, 0x6d, 0x47, 0x9c,
-	0xdb, 0x19, 0xa3, 0x82, 0xc2, 0xdb, 0x7f, 0x58, 0x3b, 0x67, 0xed, 0xb3, 0xb6, 0x79, 0x0b, 0x25,
-	0x71, 0x4a, 0x1d, 0xf5, 0xcd, 0x75, 0xe6, 0x5e, 0x40, 0x79, 0x42, 0xb9, 0x93, 0xf0, 0x48, 0xe6,
-	0x27, 0x3c, 0x2a, 0x88, 0xfd, 0x9c, 0xf0, 0x54, 0xe4, 0xe4, 0x41, 0x41, 0xed, 0x46, 0x34, 0xa2,
-	0x39, 0x2e, 0xff, 0x0a, 0xb4, 0xbe, 0xec, 0x3c, 0x19, 0x62, 0x28, 0x29, 0xf2, 0x1a, 0x5f, 0x34,
-	0xb0, 0xd3, 0xe7, 0xd1, 0xab, 0x2c, 0x44, 0x02, 0xbf, 0x54, 0x0c, 0x7c, 0x06, 0x74, 0x34, 0x14,
-	0x84, 0xb2, 0x58, 0x8c, 0x0c, 0xad, 0xae, 0x35, 0xf5, 0xae, 0xf1, 0xf5, 0xf3, 0xe3, 0xdd, 0xc2,
-	0xf0, 0x28, 0x0c, 0x19, 0xe6, 0xfc, 0x44, 0xb0, 0x38, 0x8d, 0xdc, 0xb9, 0x14, 0x3e, 0x07, 0xd5,
-	0xbc, 0xb6, 0xb1, 0x52, 0xd7, 0x9a, 0x37, 0x3a, 0x07, 0xf6, 0x92, 0x86, 0xed, 0xdc, 0xa4, 0xab,
-	0x5f, 0xfc, 0xb8, 0x5b, 0xf9, 0x34, 0x1b, 0xb7, 0x34, 0xb7, 0xc8, 0x3a, 0x7c, 0xfa, 0x7e, 0x36,
-	0x6e, 0xcd, 0xeb, 0x7d, 0x98, 0x8d, 0x5b, 0x8d, 0x79, 0x03, 0xe7, 0x65, 0x0b, 0x0b, 0xc7, 0x6d,
-	0xec, 0x83, 0xbd, 0x05, 0xc8, 0xc5, 0x3c, 0xa3, 0x29, 0xc7, 0x8d, 0x5f, 0x2b, 0x00, 0xf6, 0x79,
-	0x74, 0x82, 0xd3, 0xf0, 0x48, 0x25, 0x23, 0x11, 0xd3, 0x14, 0xee, 0x83, 0x4d, 0x1f, 0x89, 0x80,
-	0x78, 0x71, 0x68, 0xac, 0xcb, 0xfe, 0xdc, 0x0d, 0x15, 0x1f, 0x87, 0xf0, 0x00, 0xe8, 0xd2, 0xd2,
-	0x13, 0xa3, 0x0c, 0x1b, 0x55, 0xc5, 0x6d, 0x4a, 0xe0, 0x74, 0x94, 0x61, 0x78, 0x07, 0x54, 0xdf,
-	0x20, 0x96, 0x60, 0x66, 0x6c, 0x28, 0xa6, 0x88, 0x24, 0x2e, 0x4b, 0x0f, 0xb9, 0xb1, 0x99, 0xe3,
-	0x79, 0x04, 0x1f, 0x80, 0x9d, 0x01, 0xf2, 0x3d, 0x86, 0x33, 0xca, 0x84, 0x47, 0x10, 0x27, 0x86,
-	0xae, 0x04, 0xdb, 0x03, 0xe4, 0xbb, 0x0a, 0xed, 0x21, 0x4e, 0xe0, 0x3d, 0xb0, 0xcd, 0xe9, 0x90,
-	0x05, 0xd8, 0x23, 0x38, 0x8e, 0x88, 0x30, 0x40, 0x5d, 0x6b, 0xae, 0xba, 0x5b, 0x39, 0xd8, 0x53,
-	0x18, 0xec, 0x80, 0x8d, 0x80, 0x61, 0x24, 0x28, 0xfb, 0xef, 0x4c, 0x4a, 0x21, 0x84, 0x60, 0x4d,
-	0x9a, 0xa8, 0x79, 0xe8, 0xae, 0xfa, 0x87, 0x35, 0xa0, 0x07, 0x04, 0xa5, 0x29, 0x1e, 0x1c, 0xbf,
-	0x30, 0x56, 0x15, 0x31, 0x07, 0x60, 0x0b, 0xdc, 0x14, 0x71, 0x82, 0xe9, 0x50, 0x9c, 0xc6, 0x89,
-	0xbc, 0xb0, 0x24, 0x33, 0xd6, 0xea, 0x5a, 0x73, 0xcd, 0xbd, 0x82, 0x1f, 0x6e, 0xc9, 0x79, 0x95,
-	0x5e, 0x8d, 0x1a, 0x30, 0xaf, 0x5e, 0x75, 0x39, 0x89, 0xce, 0x77, 0x0d, 0xac, 0xf6, 0x79, 0x04,
-	0x7d, 0xb0, 0xf5, 0xd7, 0xae, 0xdd, 0x5f, 0xba, 0x23, 0x0b, 0xf3, 0x34, 0x1f, 0x5d, 0x47, 0x55,
-	0x7a, 0xc1, 0xb7, 0x60, 0x67, 0x71, 0xe2, 0x0f, 0xff, 0x55, 0x60, 0x41, 0x68, 0x3a, 0xd7, 0x14,
-	0x96, 0x66, 0xe6, 0xfa, 0x3b, 0xb9, 0xc3, 0xdd, 0xde, 0xc5, 0xc4, 0xd2, 0x2e, 0x27, 0x96, 0xf6,
-	0x73, 0x62, 0x69, 0x1f, 0xa7, 0x56, 0xe5, 0x72, 0x6a, 0x55, 0xbe, 0x4d, 0xad, 0xca, 0x6b, 0x3b,
-	0x8a, 0x05, 0x19, 0xfa, 0x76, 0x40, 0x13, 0xf9, 0xf4, 0x04, 0x89, 0x3a, 0xed, 0x76, 0xc7, 0x59,
-	0xb2, 0xd8, 0x72, 0xe7, 0xb8, 0x5f, 0x55, 0x0f, 0xf3, 0xc9, 0xef, 0x00, 0x00, 0x00, 0xff, 0xff,
-	0x05, 0xf8, 0x6f, 0xf7, 0x4c, 0x04, 0x00, 0x00,
+	// 508 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x53, 0x31, 0x6f, 0xd3, 0x40,
+	0x18, 0xcd, 0xd1, 0xd0, 0x36, 0x07, 0x52, 0xe9, 0x51, 0xa9, 0x89, 0x01, 0x13, 0x59, 0x20, 0xa2,
+	0x00, 0xb6, 0x62, 0x44, 0x85, 0x3a, 0x20, 0x35, 0x13, 0x1d, 0x22, 0x21, 0x17, 0x16, 0x96, 0xe8,
+	0x6c, 0x9f, 0xce, 0x16, 0xd8, 0x67, 0x7c, 0x5f, 0xaa, 0x76, 0x43, 0x8c, 0x4c, 0xfc, 0x0c, 0xc6,
+	0x0c, 0xfc, 0x00, 0xc6, 0x8e, 0x15, 0x13, 0x0b, 0x08, 0x25, 0x43, 0xfe, 0x06, 0xf2, 0xd9, 0x4e,
+	0x84, 0x31, 0x6a, 0x97, 0xc4, 0xdf, 0x7b, 0xef, 0xbb, 0xef, 0xde, 0xbb, 0x3b, 0x7c, 0x3b, 0x60,
+	0xa9, 0xeb, 0x05, 0x34, 0x8c, 0x2d, 0x0a, 0xc0, 0x24, 0x58, 0xc7, 0x03, 0x0b, 0x4e, 0xcc, 0x24,
+	0x15, 0x20, 0xc8, 0xcd, 0x25, 0x6b, 0xe6, 0xac, 0x79, 0x3c, 0xd0, 0xb6, 0x69, 0x14, 0xc6, 0xc2,
+	0x52, 0xbf, 0xb9, 0x4e, 0xdb, 0xf5, 0x84, 0x8c, 0x84, 0xb4, 0x22, 0xc9, 0xb3, 0xfe, 0x48, 0xf2,
+	0x82, 0xe8, 0xe4, 0xc4, 0x58, 0x55, 0x56, 0x5e, 0x14, 0xd4, 0x0e, 0x17, 0x5c, 0xe4, 0x78, 0xf6,
+	0x55, 0xa0, 0xdd, 0xba, 0xfd, 0x24, 0x34, 0xa5, 0x51, 0xd1, 0x67, 0x7c, 0x43, 0x78, 0x6b, 0x24,
+	0xf9, 0xeb, 0xc4, 0xa7, 0xc0, 0x5e, 0x2a, 0x86, 0xec, 0xe1, 0x16, 0x9d, 0x40, 0x20, 0xd2, 0x10,
+	0x4e, 0xdb, 0xa8, 0x8b, 0x7a, 0xad, 0x61, 0xfb, 0xfb, 0xd7, 0xc7, 0x3b, 0xc5, 0xc0, 0x03, 0xdf,
+	0x4f, 0x99, 0x94, 0x47, 0x90, 0x86, 0x31, 0x77, 0x56, 0x52, 0xf2, 0x1c, 0xaf, 0xe7, 0x6b, 0xb7,
+	0xaf, 0x74, 0x51, 0xef, 0x9a, 0x7d, 0xcb, 0xac, 0x31, 0x6c, 0xe6, 0x43, 0x86, 0xad, 0xb3, 0x5f,
+	0x77, 0x1b, 0x5f, 0x16, 0xd3, 0x3e, 0x72, 0x8a, 0xae, 0xfd, 0xa7, 0x1f, 0x17, 0xd3, 0xfe, 0x6a,
+	0xbd, 0x4f, 0x8b, 0x69, 0xdf, 0x58, 0x19, 0x38, 0x29, 0x2d, 0x54, 0xb6, 0x6b, 0x74, 0xf0, 0x6e,
+	0x05, 0x72, 0x98, 0x4c, 0x44, 0x2c, 0x99, 0xb1, 0x40, 0x98, 0x8c, 0x24, 0x3f, 0x62, 0xb1, 0x7f,
+	0xa0, 0x9a, 0x29, 0x84, 0x22, 0x26, 0x36, 0xde, 0xf0, 0x52, 0x46, 0x41, 0xa4, 0x17, 0xda, 0x2b,
+	0x85, 0xa4, 0x83, 0x37, 0x5d, 0x0a, 0x5e, 0x30, 0x0e, 0x7d, 0x65, 0xaf, 0xe5, 0x6c, 0xa8, 0xfa,
+	0xd0, 0x27, 0x77, 0x30, 0xf6, 0x02, 0x1a, 0xc7, 0xec, 0x5d, 0x46, 0xae, 0x29, 0xb2, 0x55, 0x20,
+	0x87, 0x3e, 0x79, 0x88, 0xb7, 0x21, 0x8c, 0x98, 0x98, 0xc0, 0x38, 0xfb, 0x97, 0x40, 0xa3, 0xa4,
+	0xdd, 0xec, 0xa2, 0x5e, 0xd3, 0xb9, 0x51, 0x10, 0xaf, 0x4a, 0x7c, 0x7f, 0x2f, 0xcb, 0xa0, 0x1c,
+	0x9a, 0x25, 0x70, 0xbf, 0x3e, 0x81, 0x8a, 0x25, 0xe3, 0x19, 0xd6, 0xfe, 0x45, 0xcb, 0x1c, 0x88,
+	0x86, 0x37, 0x25, 0x7b, 0x3f, 0x61, 0xb1, 0xc7, 0x94, 0xe3, 0xa6, 0xb3, 0xac, 0xed, 0x9f, 0x08,
+	0xaf, 0x8d, 0x24, 0x27, 0x2e, 0xbe, 0xfe, 0xd7, 0x2d, 0xb8, 0x57, 0x7b, 0x7a, 0x95, 0xa4, 0xb5,
+	0x47, 0x97, 0x51, 0x2d, 0xf7, 0xf1, 0x16, 0x6f, 0x55, 0xcf, 0xe2, 0xc1, 0xff, 0x16, 0xa8, 0x08,
+	0x35, 0xeb, 0x92, 0xc2, 0x72, 0x98, 0x76, 0xf5, 0x43, 0x76, 0xbb, 0x86, 0x2f, 0xce, 0x66, 0x3a,
+	0x3a, 0x9f, 0xe9, 0xe8, 0xf7, 0x4c, 0x47, 0x9f, 0xe7, 0x7a, 0xe3, 0x7c, 0xae, 0x37, 0x7e, 0xcc,
+	0xf5, 0xc6, 0x1b, 0x93, 0x87, 0x10, 0x4c, 0x5c, 0xd3, 0x13, 0x51, 0xf6, 0x28, 0x20, 0xe0, 0xf6,
+	0x60, 0x60, 0x5b, 0x35, 0x81, 0xc3, 0x69, 0xc2, 0xa4, 0xbb, 0xae, 0x9e, 0xcc, 0x93, 0x3f, 0x01,
+	0x00, 0x00, 0xff, 0xff, 0xa6, 0x95, 0x86, 0xf9, 0xe6, 0x03, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -343,7 +300,7 @@ type MsgClient interface {
 	// UpdateParams defines a (governance) operation for updating the module
 	// parameters. The authority defaults to the x/gov module account.
 	UpdateParams(ctx context.Context, in *MsgUpdateParams, opts ...grpc.CallOption) (*MsgUpdateParamsResponse, error)
-	// SendAttestation defines the SendAttestation RPC.
+	// SendAttestation attests a lab-tested batch to the chain behind channel_id.
 	SendAttestation(ctx context.Context, in *MsgSendAttestation, opts ...grpc.CallOption) (*MsgSendAttestationResponse, error)
 }
 
@@ -378,7 +335,7 @@ type MsgServer interface {
 	// UpdateParams defines a (governance) operation for updating the module
 	// parameters. The authority defaults to the x/gov module account.
 	UpdateParams(context.Context, *MsgUpdateParams) (*MsgUpdateParamsResponse, error)
-	// SendAttestation defines the SendAttestation RPC.
+	// SendAttestation attests a lab-tested batch to the chain behind channel_id.
 	SendAttestation(context.Context, *MsgSendAttestation) (*MsgSendAttestationResponse, error)
 }
 
@@ -534,62 +491,22 @@ func (m *MsgSendAttestation) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if m.SourceHeight != 0 {
-		i = encodeVarintTx(dAtA, i, uint64(m.SourceHeight))
-		i--
-		dAtA[i] = 0x50
-	}
-	if len(m.LabReportHash) > 0 {
-		i -= len(m.LabReportHash)
-		copy(dAtA[i:], m.LabReportHash)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.LabReportHash)))
-		i--
-		dAtA[i] = 0x4a
-	}
-	if len(m.Status) > 0 {
-		i -= len(m.Status)
-		copy(dAtA[i:], m.Status)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Status)))
-		i--
-		dAtA[i] = 0x42
-	}
-	if len(m.Farmer) > 0 {
-		i -= len(m.Farmer)
-		copy(dAtA[i:], m.Farmer)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Farmer)))
-		i--
-		dAtA[i] = 0x3a
-	}
-	if len(m.HerbType) > 0 {
-		i -= len(m.HerbType)
-		copy(dAtA[i:], m.HerbType)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.HerbType)))
-		i--
-		dAtA[i] = 0x32
-	}
-	if len(m.BatchId) > 0 {
-		i -= len(m.BatchId)
-		copy(dAtA[i:], m.BatchId)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.BatchId)))
-		i--
-		dAtA[i] = 0x2a
-	}
 	if m.TimeoutTimestamp != 0 {
 		i = encodeVarintTx(dAtA, i, uint64(m.TimeoutTimestamp))
 		i--
 		dAtA[i] = 0x20
 	}
-	if len(m.ChannelID) > 0 {
-		i -= len(m.ChannelID)
-		copy(dAtA[i:], m.ChannelID)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.ChannelID)))
+	if len(m.ChannelId) > 0 {
+		i -= len(m.ChannelId)
+		copy(dAtA[i:], m.ChannelId)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.ChannelId)))
 		i--
 		dAtA[i] = 0x1a
 	}
-	if len(m.Port) > 0 {
-		i -= len(m.Port)
-		copy(dAtA[i:], m.Port)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Port)))
+	if len(m.BatchId) > 0 {
+		i -= len(m.BatchId)
+		copy(dAtA[i:], m.BatchId)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.BatchId)))
 		i--
 		dAtA[i] = 0x12
 	}
@@ -623,6 +540,11 @@ func (m *MsgSendAttestationResponse) MarshalToSizedBuffer(dAtA []byte) (int, err
 	_ = i
 	var l int
 	_ = l
+	if m.Sequence != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.Sequence))
+		i--
+		dAtA[i] = 0x8
+	}
 	return len(dAtA) - i, nil
 }
 
@@ -671,39 +593,16 @@ func (m *MsgSendAttestation) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
-	l = len(m.Port)
+	l = len(m.BatchId)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
-	l = len(m.ChannelID)
+	l = len(m.ChannelId)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
 	if m.TimeoutTimestamp != 0 {
 		n += 1 + sovTx(uint64(m.TimeoutTimestamp))
-	}
-	l = len(m.BatchId)
-	if l > 0 {
-		n += 1 + l + sovTx(uint64(l))
-	}
-	l = len(m.HerbType)
-	if l > 0 {
-		n += 1 + l + sovTx(uint64(l))
-	}
-	l = len(m.Farmer)
-	if l > 0 {
-		n += 1 + l + sovTx(uint64(l))
-	}
-	l = len(m.Status)
-	if l > 0 {
-		n += 1 + l + sovTx(uint64(l))
-	}
-	l = len(m.LabReportHash)
-	if l > 0 {
-		n += 1 + l + sovTx(uint64(l))
-	}
-	if m.SourceHeight != 0 {
-		n += 1 + sovTx(uint64(m.SourceHeight))
 	}
 	return n
 }
@@ -714,6 +613,9 @@ func (m *MsgSendAttestationResponse) Size() (n int) {
 	}
 	var l int
 	_ = l
+	if m.Sequence != 0 {
+		n += 1 + sovTx(uint64(m.Sequence))
+	}
 	return n
 }
 
@@ -951,89 +853,6 @@ func (m *MsgSendAttestation) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Port", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthTx
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthTx
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Port = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 3:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ChannelID", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthTx
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthTx
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.ChannelID = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 4:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TimeoutTimestamp", wireType)
-			}
-			m.TimeoutTimestamp = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.TimeoutTimestamp |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 5:
-			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field BatchId", wireType)
 			}
 			var stringLen uint64
@@ -1064,9 +883,9 @@ func (m *MsgSendAttestation) Unmarshal(dAtA []byte) error {
 			}
 			m.BatchId = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 6:
+		case 3:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field HerbType", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field ChannelId", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -1094,109 +913,13 @@ func (m *MsgSendAttestation) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.HerbType = string(dAtA[iNdEx:postIndex])
+			m.ChannelId = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 7:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Farmer", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthTx
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthTx
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Farmer = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 8:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Status", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthTx
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthTx
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Status = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 9:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field LabReportHash", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthTx
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthTx
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.LabReportHash = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 10:
+		case 4:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field SourceHeight", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field TimeoutTimestamp", wireType)
 			}
-			m.SourceHeight = 0
+			m.TimeoutTimestamp = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTx
@@ -1206,7 +929,7 @@ func (m *MsgSendAttestation) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.SourceHeight |= int64(b&0x7F) << shift
+				m.TimeoutTimestamp |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -1261,6 +984,25 @@ func (m *MsgSendAttestationResponse) Unmarshal(dAtA []byte) error {
 			return fmt.Errorf("proto: MsgSendAttestationResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Sequence", wireType)
+			}
+			m.Sequence = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Sequence |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTx(dAtA[iNdEx:])

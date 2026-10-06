@@ -2,9 +2,10 @@ syntax = "proto3";
 package herbchain.attest.v1;
 
 import "amino/amino.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
-import "cosmos/base/query/v1beta1/pagination.proto";
+import "herbchain/attest/v1/attestation.proto";
 import "herbchain/attest/v1/params.proto";
 
 option go_package = "github.com/parthg2112/herbchain/x/attest/types";
@@ -15,6 +16,22 @@ service Query {
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
     option (google.api.http).get = "/parthg2112/herbchain/attest/v1/params";
   }
+  // Attestation returns a received attestation by local channel and batch id.
+  rpc Attestation(QueryAttestationRequest) returns (QueryAttestationResponse) {
+    option (google.api.http).get = "/parthg2112/herbchain/attest/v1/attestations/{channel_id}/{batch_id}";
+  }
+  // Attestations lists received attestations ordered by (channel, batch id).
+  rpc Attestations(QueryAttestationsRequest) returns (QueryAttestationsResponse) {
+    option (google.api.http).get = "/parthg2112/herbchain/attest/v1/attestations";
+  }
+  // SentAttestation returns the delivery status of an attestation sent on a channel.
+  rpc SentAttestation(QuerySentAttestationRequest) returns (QuerySentAttestationResponse) {
+    option (google.api.http).get = "/parthg2112/herbchain/attest/v1/sent_attestations/{channel_id}/{batch_id}";
+  }
+  // SentAttestations lists sent attestations ordered by (channel, batch id).
+  rpc SentAttestations(QuerySentAttestationsRequest) returns (QuerySentAttestationsResponse) {
+    option (google.api.http).get = "/parthg2112/herbchain/attest/v1/sent_attestations";
+  }
 }
 
 // QueryParamsRequest is request type for the Query/Params RPC method.
@@ -23,8 +40,49 @@ message QueryParamsRequest {}
 // QueryParamsResponse is response type for the Query/Params RPC method.
 message QueryParamsResponse {
   // params holds all the parameters of this module.
-  Params params = 1 [
-    (gogoproto.nullable) = false,
-    (amino.dont_omitempty) = true
-  ];
+  Params params = 1 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+}
+
+// QueryAttestationRequest is the Query/Attestation request type.
+message QueryAttestationRequest {
+  string channel_id = 1;
+  string batch_id   = 2;
+}
+
+// QueryAttestationResponse is the Query/Attestation response type.
+message QueryAttestationResponse {
+  Attestation attestation = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryAttestationsRequest is the Query/Attestations request type.
+message QueryAttestationsRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryAttestationsResponse is the Query/Attestations response type.
+message QueryAttestationsResponse {
+  repeated Attestation                   attestations = 1 [(gogoproto.nullable) = false];
+  cosmos.base.query.v1beta1.PageResponse pagination   = 2;
+}
+
+// QuerySentAttestationRequest is the Query/SentAttestation request type.
+message QuerySentAttestationRequest {
+  string channel_id = 1;
+  string batch_id   = 2;
+}
+
+// QuerySentAttestationResponse is the Query/SentAttestation response type.
+message QuerySentAttestationResponse {
+  SentAttestation sent_attestation = 1 [(gogoproto.nullable) = false];
+}
+
+// QuerySentAttestationsRequest is the Query/SentAttestations request type.
+message QuerySentAttestationsRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QuerySentAttestationsResponse is the Query/SentAttestations response type.
+message QuerySentAttestationsResponse {
+  repeated SentAttestation               sent_attestations = 1 [(gogoproto.nullable) = false];
+  cosmos.base.query.v1beta1.PageResponse pagination        = 2;
 }

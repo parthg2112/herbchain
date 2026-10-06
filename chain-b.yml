@@ -1,0 +1,59 @@
+# Chain B of the local IBC pair (scripts/relayer.sh). Mnemonics are DEV-ONLY.
+version: 1
+validation: sovereign
+default_denom: stake
+build:
+  binary: herbchaind
+accounts:
+- name: alice
+  coins:
+  - 200000000stake
+  mnemonic: movie pulse hello animal consider maple sail device fury bless ostrich disorder reveal rigid love exit donkey stool cheese october armor lend host ignore
+- name: bob
+  coins:
+  - 200000000stake
+  mnemonic: shiver inmate hope update purse sudden seminar grief cook taxi ginger arrow border artist glide rude mean alcohol sport dose scan divide history tent
+- name: carol
+  coins:
+  - 200000000stake
+  mnemonic: round emotion season vacant disagree street six drift law sphere rib fee useful coil again yard suffer chest stay hamster satisfy bulk number tongue
+- name: validator
+  coins:
+  - 500000000stake
+  mnemonic: asset rally range pulse regret cost thunder few this lava february favorite permit buffalo ivory system end business apology hour upgrade fever acquire improve
+- name: relayer
+  coins:
+  - 200000000stake
+  mnemonic: walk sunny stereo seven expire giraffe mom area possible august wool pudding decorate powder bunker mango lamp alter devote diary vast verb peasant endorse
+genesis:
+  chain_id: herbchain-b
+  app_state:
+    herbtrace:
+      params:
+        # carol
+        certifiers:
+        - herb182cq5qpwux45lysl2ud2ek9txym8c7fwges8ju
+        max_certifications: 10
+validators:
+- name: validator
+  bonded: 100000000stake
+  home: ~/.herbchain-b
+  app:
+    api:
+      address: tcp://0.0.0.0:1315
+    grpc:
+      address: 0.0.0.0:9070
+    grpc-web:
+      address: 0.0.0.0:9071
+    minimum-gas-prices: 0stake
+  config:
+    p2p:
+      laddr: tcp://0.0.0.0:26456
+    rpc:
+      laddr: tcp://0.0.0.0:26457
+      pprof_laddr: localhost:6062
+    consensus:
+      # fast blocks for demos
+      timeout_commit: 1s
+  client:
+    node: tcp://localhost:26457

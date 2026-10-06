@@ -22,7 +22,7 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-// AttestPacketData defines the Attest data packet.
+// AttestPacketData is the envelope for all attest packets.
 type AttestPacketData struct {
 	// Types that are valid to be assigned to Packet:
 	//	*AttestPacketData_NoData
@@ -145,11 +145,12 @@ func (m *NoData) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_NoData proto.InternalMessageInfo
 
-// AttestationPacketData defines a struct for the packet payload
+// AttestationPacketData attests a batch's lab result to the counterparty chain.
 type AttestationPacketData struct {
-	BatchId       string `protobuf:"bytes,1,opt,name=batch_id,json=batchId,proto3" json:"batch_id,omitempty"`
-	HerbType      string `protobuf:"bytes,2,opt,name=herb_type,json=herbType,proto3" json:"herb_type,omitempty"`
-	Farmer        string `protobuf:"bytes,3,opt,name=farmer,proto3" json:"farmer,omitempty"`
+	BatchId  string `protobuf:"bytes,1,opt,name=batch_id,json=batchId,proto3" json:"batch_id,omitempty"`
+	HerbType string `protobuf:"bytes,2,opt,name=herb_type,json=herbType,proto3" json:"herb_type,omitempty"`
+	Farmer   string `protobuf:"bytes,3,opt,name=farmer,proto3" json:"farmer,omitempty"`
+	// status is one of TESTED, PACKAGED, SHIPPED, DELIVERED (wire vocabulary, not the herbtrace enum).
 	Status        string `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
 	LabReportHash string `protobuf:"bytes,5,opt,name=lab_report_hash,json=labReportHash,proto3" json:"lab_report_hash,omitempty"`
 	SourceHeight  int64  `protobuf:"varint,6,opt,name=source_height,json=sourceHeight,proto3" json:"source_height,omitempty"`
@@ -230,7 +231,7 @@ func (m *AttestationPacketData) GetSourceHeight() int64 {
 	return 0
 }
 
-// AttestationPacketAck defines a struct for the packet acknowledgment
+// AttestationPacketAck is the success acknowledgement payload.
 type AttestationPacketAck struct {
 	Received bool `protobuf:"varint,1,opt,name=received,proto3" json:"received,omitempty"`
 }

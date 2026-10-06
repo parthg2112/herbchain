@@ -1,9 +1,8 @@
 package cli
 
 import (
+	"fmt"
 	"time"
-
-	"github.com/spf13/cast"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -13,56 +12,51 @@ import (
 	"github.com/parthg2112/herbchain/x/attest/types"
 )
 
-// CmdSendAttestation() returns the Attestation send packet command.
-// This command does not use AutoCLI because it gives a better UX to do not.
-func CmdSendAttestation() *cobra.Command {
-	flagPacketTimeoutTimestamp := "packet-timeout-timestamp"
+const (
+	flagTimeout          = "timeout"
+	flagTimeoutTimestamp = "timeout-timestamp"
+	defaultTimeout       = 10 * time.Minute
+)
 
+// CmdSendAttestation returns the send-attestation command. It is hand-written because the
+// relative --timeout must be converted to an absolute timestamp on the client.
+func CmdSendAttestation() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "send-attestation [src-port] [src-channel] [batch-id] [herb-type] [farmer] [status] [lab-report-hash] [source-height]",
-		Short: "Send a attestation over IBC",
-		Args:  cobra.ExactArgs(8),
+		Use:   "send-attestation [channel-id] [batch-id]",
+		Short: "Attest a lab-tested batch to the chain behind an attest channel",
+		Long: `Reads the batch from x/herbtrace and sends it as an IBC attestation packet.
+The batch must be TESTED, PACKAGED, SHIPPED or DELIVERED.`,
+		Example: fmt.Sprintf("%s tx %s send-attestation channel-0 BATCH-001 --timeout 5m --from alice",
+			"herbchaind", types.ModuleName),
+		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			creator := clientCtx.GetFromAddress().String()
-			srcPort := args[0]
-			srcChannel := args[1]
-
-			argBatchId := args[2]
-			argHerbType := args[3]
-			argFarmer := args[4]
-			argStatus := args[5]
-			argLabReportHash := args[6]
-			argSourceHeight, err := cast.ToInt64E(args[7])
+			timeoutTimestamp, err := cmd.Flags().GetUint64(flagTimeoutTimestamp)
 			if err != nil {
 				return err
 			}
-
-			// Get the relative timeout timestamp
-			timeoutTimestamp, err := cmd.Flags().GetUint64(flagPacketTimeoutTimestamp)
-			if err != nil {
-				return err
-			}
-
-			if timeoutTimestamp != 0 {
-				now := time.Now().UnixNano()
-				if now <= 0 {
+			if timeoutTimestamp == 0 {
+				relative, err := cmd.Flags().GetDuration(flagTimeout)
+				if err != nil {
 					return err
 				}
-				timeoutTimestamp = uint64(now) + timeoutTimestamp
+				if relative <= 0 {
+					return fmt.Errorf("--%s must be positive, got %s", flagTimeout, relative)
+				}
+				timeoutTimestamp = uint64(time.Now().Add(relative).UnixNano())
 			}
 
-			msg := types.NewMsgSendAttestation(creator, srcPort, srcChannel, timeoutTimestamp, argBatchId, argHerbType, argFarmer, argStatus, argLabReportHash, argSourceHeight)
-
+			msg := types.NewMsgSendAttestation(clientCtx.GetFromAddress().String(), args[0], args[1], timeoutTimestamp)
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
 	}
 
-	cmd.Flags().Uint64(flagPacketTimeoutTimestamp, DefaultRelativePacketTimeoutTimestamp, "Packet timeout timestamp in nanoseconds. Default is 10 minutes.")
+	cmd.Flags().Duration(flagTimeout, defaultTimeout, "Packet timeout relative to local wall-clock time")
+	cmd.Flags().Uint64(flagTimeoutTimestamp, 0, "Absolute packet timeout in unix nanoseconds; overrides --timeout")
 	flags.AddTxFlagsToCmd(cmd)
 
 	return cmd

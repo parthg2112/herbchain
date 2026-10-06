@@ -4,7 +4,7 @@ package herbchain.attest.v1;
 
 option go_package = "github.com/parthg2112/herbchain/x/attest/types";
 
-// AttestPacketData defines the Attest data packet.
+// AttestPacketData is the envelope for all attest packets.
 message AttestPacketData {
   oneof packet {
     NoData                noData             = 1;
@@ -15,18 +15,18 @@ message AttestPacketData {
 // NoData defines an empty data packet.
 message NoData {}
 
-// AttestationPacketData defines a struct for the packet payload
+// AttestationPacketData attests a batch's lab result to the counterparty chain.
 message AttestationPacketData {
-  string batch_id        = 1;
-  string herb_type       = 2;
-  string farmer          = 3;
+  string batch_id  = 1;
+  string herb_type = 2;
+  string farmer    = 3;
+  // status is one of TESTED, PACKAGED, SHIPPED, DELIVERED (wire vocabulary, not the herbtrace enum).
   string status          = 4;
   string lab_report_hash = 5;
   int64  source_height   = 6;
 }
 
-// AttestationPacketAck defines a struct for the packet acknowledgment
+// AttestationPacketAck is the success acknowledgement payload.
 message AttestationPacketAck {
   bool received = 1;
 }
-

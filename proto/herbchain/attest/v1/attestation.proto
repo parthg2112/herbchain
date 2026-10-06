@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package herbchain.attest.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/parthg2112/herbchain/x/attest/types";
+
+// SentStatus is the delivery outcome of an attestation packet on the sending chain.
+enum SentStatus {
+  option (gogoproto.goproto_enum_prefix) = false;
+
+  SENT_STATUS_UNSPECIFIED = 0 [(gogoproto.enumvalue_customname) = "SentStatusUnspecified"];
+  SENT_STATUS_PENDING     = 1 [(gogoproto.enumvalue_customname) = "SentStatusPending"];
+  SENT_STATUS_ACKED       = 2 [(gogoproto.enumvalue_customname) = "SentStatusAcked"];
+  SENT_STATUS_ERRORED     = 3 [(gogoproto.enumvalue_customname) = "SentStatusErrored"];
+  SENT_STATUS_TIMED_OUT   = 4 [(gogoproto.enumvalue_customname) = "SentStatusTimedOut"];
+}
+
+// Attestation is a lab-result attestation received over IBC, stored on the receiving chain.
+message Attestation {
+  // channel_id is the local (destination) channel the packet arrived on.
+  string channel_id      = 1;
+  string source_port     = 2;
+  string source_channel  = 3;
+  string batch_id        = 4;
+  string herb_type       = 5;
+  string farmer          = 6;
+  string status          = 7;
+  string lab_report_hash = 8;
+  int64  source_height   = 9;
+  uint64 sequence        = 10;
+  int64  received_height = 11;
+  // received_time is the block time in unix seconds.
+  int64 received_time = 12;
+}
+
+// SentAttestation tracks the latest attestation packet sent for a (channel, batch) pair.
+message SentAttestation {
+  string     channel_id     = 1;
+  string     batch_id       = 2;
+  uint64     sequence       = 3;
+  SentStatus status         = 4;
+  string     error          = 5;
+  string     sender         = 6;
+  int64      sent_height    = 7;
+  int64      updated_height = 8;
+  // acked_sequence is the last successfully acked sequence; kept across resends (0 if never acked).
+  uint64 acked_sequence = 9;
+}
+
+// EventAttestationSent is emitted when an attestation packet is committed on the sending chain.
+message EventAttestationSent {
+  string channel_id = 1;
+  string batch_id   = 2;
+  uint64 sequence   = 3;
+  string sender     = 4;
+  string status     = 5;
+}
+
+// EventAttestationReceived is emitted when an attestation is stored on the receiving chain.
+message EventAttestationReceived {
+  string channel_id     = 1;
+  string source_channel = 2;
+  string batch_id       = 3;
+  uint64 sequence       = 4;
+}
+
+// EventAttestationRejected is emitted (as an error event) when a received packet is rejected.
+message EventAttestationRejected {
+  string channel_id = 1;
+  string batch_id   = 2;
+  uint64 sequence   = 3;
+  string reason     = 4;
+}
+
+// EventAttestationOutcome is emitted on the sending chain when a packet is acked or times out.
+message EventAttestationOutcome {
+  string     channel_id = 1;
+  string     batch_id   = 2;
+  uint64     sequence   = 3;
+  SentStatus status     = 4;
+  string     error      = 5;
+}

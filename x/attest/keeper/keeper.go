@@ -24,8 +24,14 @@ type Keeper struct {
 	Params collections.Item[types.Params]
 
 	Port collections.Item[string]
+	// Attestations holds received attestations keyed by (local channel, batch id).
+	Attestations collections.Map[collections.Pair[string, string], types.Attestation]
+	// SentAttestations tracks the latest send per (source channel, batch id).
+	SentAttestations collections.Map[collections.Pair[string, string], types.SentAttestation]
 
 	ibcKeeperFn func() *ibckeeper.Keeper
+	// packetSender overrides the IBC channel keeper; set only in tests.
+	packetSender types.PacketSender
 
 	herbtraceKeeper types.HerbtraceKeeper
 }
@@ -36,7 +42,6 @@ func NewKeeper(
 	addressCodec address.Codec,
 	authority []byte,
 	ibcKeeperFn func() *ibckeeper.Keeper,
-
 	herbtraceKeeper types.HerbtraceKeeper,
 ) Keeper {
 	if _, err := addressCodec.BytesToString(authority); err != nil {
@@ -44,6 +49,7 @@ func NewKeeper(
 	}
 
 	sb := collections.NewSchemaBuilder(storeService)
+	pairKey := collections.PairKeyCodec(collections.StringKey, collections.StringKey)
 
 	k := Keeper{
 		storeService: storeService,
@@ -55,6 +61,10 @@ func NewKeeper(
 		ibcKeeperFn:     ibcKeeperFn,
 		Port:            collections.NewItem(sb, types.PortKey, "port", collections.StringValue),
 		Params:          collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
+		Attestations: collections.NewMap(sb, types.AttestationsKey, "attestations", pairKey,
+			codec.CollValue[types.Attestation](cdc)),
+		SentAttestations: collections.NewMap(sb, types.SentAttestationsKey, "sent_attestations", pairKey,
+			codec.CollValue[types.SentAttestation](cdc)),
 	}
 
 	schema, err := sb.Build()
@@ -69,4 +79,18 @@ func NewKeeper(
 // GetAuthority returns the module's authority.
 func (k Keeper) GetAuthority() []byte {
 	return k.authority
+}
+
+func (k Keeper) sender() (types.PacketSender, error) {
+	if k.packetSender != nil {
+		return k.packetSender, nil
+	}
+	if k.ibcKeeperFn == nil {
+		return nil, types.ErrIBCUnavailable
+	}
+	ibcKeeper := k.ibcKeeperFn()
+	if ibcKeeper == nil || ibcKeeper.ChannelKeeper == nil {
+		return nil, types.ErrIBCUnavailable
+	}
+	return ibcKeeper.ChannelKeeper, nil
 }
