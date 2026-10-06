@@ -100,7 +100,7 @@ attest queries: `Attestation(channel, batch_id)`, `Attestations`, `SentAttestati
 | `0x01` | `Attestations` | `Pair[string channel, string batch_id]` | `Attestation` | receiver |
 | `0x02` | `SentAttestations` | `Pair[string channel, string batch_id]` | `SentAttestation` (PENDING, ACKED, ERRORED, TIMED_OUT) | sender |
 
-<!-- TODO(orchestrator): confirm x/attest prefixes and key semantics with the IBC agent's final keeper. -->
+`channel` is the local channel end on each chain: the destination channel for `Attestations` and the source channel for `SentAttestations`.
 
 ## Quickstart
 
@@ -135,10 +135,8 @@ It then checks the history and the by-status and by-owner queries. It also expec
 
 ### Phase 2: two chains + Hermes
 
-<!-- TODO(orchestrator): verify against chain-a.yml / chain-b.yml / scripts/relayer.sh once the IBC agent finishes. -->
-
 ```sh
-scripts/relayer.sh up      # serve chain-a.yml + chain-b.yml, install pinned Hermes, open the attest channel, relay
+scripts/relayer.sh up      # init chain-a.yml + chain-b.yml, start both, install pinned Hermes, open the attest channel, relay
 make demo-ibc              # scripts/demo-ibc.sh
 scripts/relayer.sh down    # stop Hermes and both chains
 ```
@@ -149,6 +147,8 @@ scripts/relayer.sh down    # stop Hermes and both chains
 | chain-id | `herbchain-a` | `herbchain-b` |
 | Home | `~/.herbchain-a` | `~/.herbchain-b` |
 | RPC | `26557` | `26457` |
+
+`relayer.sh` initialises each chain with `ignite chain init -c chain-X.yml` and then runs `herbchaind start`. It does not use `ignite chain serve`, which rebuilds and restarts the chain on every source change and would kill it mid-demo. `ignite chain serve -c chain-a.yml` and `-c chain-b.yml` also work for interactive use. `RESET=1` re-initialises both chains.
 
 `scripts/relayer.sh` also exposes the individual steps: `chains-up`, `setup`, `start`, `stop`, `status`, `channel`.
 
@@ -175,7 +175,7 @@ Defined in `config.yml` with pinned mnemonics so addresses are deterministic. **
 | Cosmos SDK | v0.53.6 |
 | ibc-go | v10.4.0 |
 | CometBFT | v0.38.21 |
-| Hermes | v1.13.3, a sha256-pinned release binary installed by `scripts/relayer.sh install`. The binary self-reports 1.13.2. <!-- TODO(orchestrator): confirm --> |
+| Hermes | v1.13.3, a sha256-pinned release binary installed by `scripts/relayer.sh install`. The binary self-reports 1.13.2. |
 | buf | 1.73.0 (go.mod `tool`) |
 | golangci-lint | v2.14.0 |
 | Dev OS | WSL2 Ubuntu 24.04 |

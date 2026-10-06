@@ -4,11 +4,14 @@ This document records the design decisions behind `x/herbtrace` and `x/attest`. 
 
 ## 1. State: explicit KeySet indexes vs `collections.IndexedMap`
 
-<!-- TODO(orchestrator): replace this section with the herbtrace agent's final choice and rationale. -->
+Decision: explicit KeySets. `x/herbtrace/keeper/keeper.go` and `batch.go` use a plain `Map[string, Batch]` plus two `KeySet` indexes, `OwnerIndex` (`Pair[AccAddress, id]`) and `StatusIndex` (`Pair[int32, id]`). Every batch write goes through one function, `setBatch(old, new)`. It removes stale index entries only when the owner or status actually changed, then writes the new entries.
 
-Current code (`x/herbtrace/keeper/keeper.go`, `batch.go`) uses a plain `Map[string, Batch]` plus two `KeySet` indexes, `OwnerIndex` (`Pair[AccAddress, id]`) and `StatusIndex` (`Pair[int32, id]`). Every batch write goes through one function, `setBatch(old, new)`. It removes stale index entries only when the owner or status actually changed, then writes the new entries.
+Why:
+- The store layout in brief §3 is the literal key layout: `Pair[AccAddress, id]` and `Pair[int32, id]` with `NoValue`. By-owner and by-status pagination is a plain prefix scan (`query.CollectionPaginate` + `WithCollectionPaginationPairPrefix`). No reference-key callback or index struct is needed.
+- `setBatch` touches an index only when the owner or status changed. Writes that change neither, such as a location update, leave the indexes alone.
+- InitGenesis rebuilds both indexes through the same `setBatch`. The round-trip test asserts index queries after import.
 
-Trade-offs to state here:
+Trade-offs:
 - `IndexedMap` keeps the indexes consistent automatically. Its cost is a reference-key layout fixed by the library. It also does an index lookup-and-diff on every `Set`, even when nothing indexed changed.
 - Explicit KeySets make the key layout and the write set visible in the code under review. The cost is discipline: any write that bypasses `setBatch` corrupts the indexes. Tests must cover index state after create, status change and custody transfer.
 
@@ -69,13 +72,14 @@ Each batch has its own sequence: `History[Pair[id, seq]]` with `HistorySeq[id]` 
 
 ## 9. IBC attestation (`x/attest`)
 
-<!-- TODO(orchestrator): confirm each point below against the IBC agent's final keeper and IBC module callbacks. -->
-
 - **Packet.** `AttestationPacket{batch_id, herb_type, farmer, status, lab_report_hash, source_height}` on port `attest`, unordered channel. The ack is `{received: bool}`. Failures use the standard error acknowledgement.
-- **Send.** `MsgSendAttestation` reads the batch through an expected-keeper interface (`GetBatch`). It rejects any status outside TESTED, PACKAGED, SHIPPED and DELIVERED, so only batches that passed a lab test are attested. The packet carries the sender chain's state at `source_height`. It is a snapshot, not a live link.
-- **Status as string.** Chain B decodes the status without importing chain A's enum, so the two chains can upgrade `x/herbtrace` independently. The receiver validates the string against its known set.
+- **Channel.** It must be UNORDERED, because a timeout on an ORDERED channel closes it. The version must be `attest-1`, and an empty proposed version gets `attest-1`.
+- **Send.** `MsgSendAttestation{creator, channel_id, batch_id, timeout_timestamp}` has no port field and always sends on `attest`. ibc-go v10 has no capabilities, so a user-chosen port would let anyone send on another module's port. The msg reads the batch through an expected-keeper interface (`GetBatch`). It rejects any status outside TESTED, PACKAGED, SHIPPED and DELIVERED, so only batches that passed a lab test are attested. The packet carries the sender chain's state at `source_height`. It is a snapshot, not a live link.
+- **Status as string.** Chain B decodes the status without importing chain A's enum, so the two chains can upgrade `x/herbtrace` independently. The receiver checks the string against TESTED, PACKAGED, SHIPPED and DELIVERED in `AttestationPacketData.ValidateBasic`. It also checks the batch id format, the 64-hex hash and a bech32 farmer under any prefix.
 - **Receiver key.** `Attestations[Pair[channel, batch_id]]` uses the local (destination) channel. A channel end maps 1:1 to its counterparty, so two source chains that reuse a batch id never collide. A second packet for the same pair is rejected with an error ack, and the receiver's state does not change.
-- **Sender outcome.** `SentAttestations[Pair[channel, batch_id]]` is set to PENDING on send. `OnAcknowledgementPacket` changes it to ACKED, or to ERRORED with the error string. `OnTimeoutPacket` changes it to TIMED_OUT.
+- **Sender outcome.** `SentAttestations[Pair[channel, batch_id]]` is set to PENDING on send. `OnAcknowledgementPacket` changes it to ACKED, or to ERRORED with the error string. `OnTimeoutPacket` changes it to TIMED_OUT. Callbacks whose sequence doesn't match the stored record change nothing. A malformed ack result is recorded as ERRORED rather than returned as an error, so the packet can still be cleared.
+- **Resend.** A resend is rejected while PENDING and allowed after ACKED, ERRORED or TIMED_OUT. `acked_sequence` keeps the last successful delivery, so an ERRORED duplicate doesn't hide that chain B already holds the attestation.
+- **Error acks.** They use `NewErrorAcknowledgementWithCodespace`, giving a deterministic `attest/<code>` in the ack bytes. The full reason is emitted as `EventAttestationRejected`. Recv state writes are discarded on error acks.
 - **Trust.** IBC light clients prove that the packet came from chain A's `attest` module. They do not prove that the lab result is true. Chain B trusts chain A's certifier set.
 
 ## 10. Differences from the Fabric chaincode
