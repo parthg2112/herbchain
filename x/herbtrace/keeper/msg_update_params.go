@@ -23,9 +23,14 @@ func (k msgServer) UpdateParams(ctx context.Context, req *types.MsgUpdateParams)
 	if err := req.Params.Validate(); err != nil {
 		return nil, err
 	}
+	for _, c := range req.Params.Certifiers {
+		if _, err := k.addressCodec.StringToBytes(c); err != nil {
+			return nil, errorsmod.Wrapf(types.ErrInvalidParams, "certifier %q: %s", c, err)
+		}
+	}
 
 	if err := k.Params.Set(ctx, req.Params); err != nil {
-		return nil, err
+		return nil, errorsmod.Wrap(err, "set params")
 	}
 
 	return &types.MsgUpdateParamsResponse{}, nil
