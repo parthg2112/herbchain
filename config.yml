@@ -1,27 +1,50 @@
+# Ignite dev config for one local node. All mnemonics are DEV-ONLY; never fund these keys on a real network.
 version: 1
 validation: sovereign
 default_denom: stake
-accounts: 
+build:
+  binary: herbchaind
+accounts:
+# farmer (DEV-ONLY)
 - name: alice
   coins:
-  - 20000token
   - 200000000stake
+  mnemonic: movie pulse hello animal consider maple sail device fury bless ostrich disorder reveal rigid love exit donkey stool cheese october armor lend host ignore
+# processor (DEV-ONLY)
 - name: bob
   coins:
-  - 10000token
-  - 100000000stake
+  - 200000000stake
+  mnemonic: shiver inmate hope update purse sudden seminar grief cook taxi ginger arrow border artist glide rude mean alcohol sport dose scan divide history tent
+# certifier, listed in herbtrace params (DEV-ONLY)
+- name: carol
+  coins:
+  - 200000000stake
+  mnemonic: round emotion season vacant disagree street six drift law sphere rib fee useful coil again yard suffer chest stay hamster satisfy bulk number tongue
+# validator operator (DEV-ONLY)
+- name: validator
+  coins:
+  - 500000000stake
+  mnemonic: asset rally range pulse regret cost thunder few this lava february favorite permit buffalo ivory system end business apology hour upgrade fever acquire improve
+# IBC relayer key (DEV-ONLY)
+- name: relayer
+  coins:
+  - 200000000stake
+  mnemonic: walk sunny stereo seven expire giraffe mom area possible august wool pudding decorate powder bunker mango lamp alter devote diary vast verb peasant endorse
 client:
   openapi:
     path: docs/static/openapi.json
-faucet:
-  name: bob
-  coins:
-  - 5token
-  - 100000stake
+genesis:
+  app_state:
+    herbtrace:
+      params:
+        # carol
+        certifiers:
+        - herb182cq5qpwux45lysl2ud2ek9txym8c7fwges8ju
+        max_certifications: 10
 validators:
-- name: alice
+- name: validator
   bonded: 100000000stake
-- name: validator1
-  bonded: 200000000stake
-- name: validator2
-  bonded: 100000000stake
+  config:
+    consensus:
+      # fast blocks for demos
+      timeout_commit: 1s

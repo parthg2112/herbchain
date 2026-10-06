@@ -8,8 +8,22 @@ release/
 *.log
 *.ign
 
-# local chain data, build output
+# build output
 /build/
+/bin/
+/herbchaind
+*.test
+
+# local chain homes, keyrings, Ignite and Hermes state
 .herbchain*/
+.ignite/
+.hermes/
 /data/
+/tmp/
+keyring-test/
+keyring-file/
+
+# coverage
 coverage*.out
+coverage*.html
+*.coverprofile

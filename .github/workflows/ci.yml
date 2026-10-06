@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    name: build + test
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: go build
+        run: go build -mod=readonly ./...
+      - name: go test
+        run: go test -mod=readonly -covermode=atomic -coverprofile=coverage.out ./...
+      - name: x/ coverage
+        run: go test -mod=readonly -cover ./x/...
+
+  golangci-lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - uses: golangci/golangci-lint-action@v9
+        with:
+          # keep in sync with GOLANGCI_LINT_VERSION in Makefile
+          version: v2.14.0
+
+  buf-lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: bufbuild/buf-action@v1
+        with:
+          # matches the buf tool pinned in go.mod
+          version: 1.73.0
+          lint: true
+          format: false
+          breaking: false
+          push: false
+          archive: false
+          pr_comment: false

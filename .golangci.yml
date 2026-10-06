@@ -1,0 +1,51 @@
+version: "2"
+
+run:
+  timeout: 15m
+  tests: true
+
+linters:
+  default: standard
+  enable:
+    - forbidigo
+    - misspell
+    - unconvert
+    - errorlint
+  settings:
+    forbidigo:
+      forbid:
+        # state transitions must read time from the block header
+        - pattern: ^time\.Now$
+          msg: use sdk.UnwrapSDKContext(ctx).BlockTime()
+      analyze-types: true
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - std-error-handling
+    rules:
+      # only keeper/types code is consensus-critical
+      - path-except: ^x/[^/]+/(keeper|types)/
+        linters:
+          - forbidigo
+      - path: _test\.go
+        linters:
+          - forbidigo
+      # Ignite scaffold: SDK v0.53 still requires these deprecated APIs
+      - path: ^(app|cmd)/
+        linters:
+          - staticcheck
+        text: (SA1019|QF1007|QF1008|QF1011|ST1023)
+      - path: ^x/[^/]+/module/module\.go$
+        linters:
+          - staticcheck
+        text: SA1019.*types/module\.AppModule is deprecated
+    paths:
+      - docs/
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
